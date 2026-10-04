@@ -1,0 +1,55 @@
+# Built-in xngl defaults. Every style extends this preset.
+
+[font]
+name = "helvetica"
+
+[map]
+
+[contour]
+fill = "area"
+lines = false
+line_labels = false
+
+[vectors]
+color = "black"
+thickness = 1.0
+
+[ticks]
+outward = false
+label_font_height = 0.016
+outer_only = false
+
+[strings]
+font_height = 0.02
+gap = 0.02
+
+[tags]
+font_height = 0.02
+just = "TopLeft"
+
+[colorbar]
+title_position = "bottom"
+orientation = "horizontal"
+end_caps = "none"
+label_stride = 1
+label_angle = 0.0
+box_lines = true
+raster_fill = false
+
+[shapefile]
+color = "black"
+thickness = 1.0
+dash = 0
+
+[box]
+color = "black"
+thickness = 1.0
+
+[stipple]
+marker = "dot"
+size = 0.004
+color = "black"
+
+[panel]
+
+[workstation]
