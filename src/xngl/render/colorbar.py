@@ -7,6 +7,7 @@ import warnings
 import Ngl
 import numpy as np
 
+from ..colors.colormaps import get
 from ..errors import RenderError, XnglWarning
 from .util import to_resources
 
@@ -31,9 +32,13 @@ def colorbar_modes(fig) -> dict[tuple[int, int], str]:
 
 
 def _palette(first) -> np.ndarray:
+    """The fill colours the panel's contour plot actually used (from its final resources)."""
     spec = first.base
-    if spec.cmap is not None:
-        return np.array(spec.cmap.for_levels(spec.levels).rgba)
+    palette = (spec.resolved or {}).get("cnFillPalette")
+    if isinstance(palette, str):          # a name given through res= or a style
+        return np.array(get(palette).for_levels(spec.levels).rgba)
+    if palette is not None:               # RGBA array (cmap= keyword or contour.cmap style)
+        return np.asarray(palette)
     return np.asarray(Ngl.get_integer_array(first.ngl_plot.contour, "cnFillColors"))
 
 

@@ -45,16 +45,15 @@ def _group_bar_space(fig) -> dict:
     """Reserve room for shared colour bars so they stay on the page."""
     r = {}
     for group, spec in fig.colorbars:
-        if spec.orientation == "vertical":
-            if any(ax.index[1] == fig.ncols - 1 for ax in group):
+        if spec.orientation == "vertical":   # the bar sits right of the group's last column
+            if max(ax.index[1] for ax in group) == fig.ncols - 1:
                 r["nglPanelRight"] = 1.0 - GROUP_BAR_SPACE
             else:
                 r["nglPanelXWhiteSpacePercent"] = GROUP_BAR_GAP_PERCENT
-        else:
-            if any(ax.index[0] == fig.nrows - 1 for ax in group):
-                r["nglPanelBottom"] = GROUP_BAR_SPACE
-            if any(ax.index[0] < fig.nrows - 1 for ax in group):
-                r["nglPanelYWhiteSpacePercent"] = GROUP_BAR_GAP_PERCENT
+        elif max(ax.index[0] for ax in group) == fig.nrows - 1:   # bar below the last row
+            r["nglPanelBottom"] = GROUP_BAR_SPACE
+        else:                                 # bar between rows
+            r["nglPanelYWhiteSpacePercent"] = GROUP_BAR_GAP_PERCENT
     return r
 
 

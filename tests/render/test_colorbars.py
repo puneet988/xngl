@@ -118,3 +118,34 @@ def test_group_bar_off_page_warns(make_da, outdir):
     f.colorbar(panels=f.row(1))
     with pytest.warns(xn.errors.XnglWarning, match="outside the page"):
         f.save()
+
+
+def test_shared_bar_uses_style_cmap_colours(make_da, outdir):
+    f = xn.Figure(ncols=2, output=outdir / "stylecmap.png",
+                  style={"contour": {"cmap": "cb_BrBG"}})
+    for ax in f.panels:
+        ax.contour_map(make_da(), levels=LEV)
+    cb = f.colorbar()
+    f.save()
+    expected = xn.colors.get("cb_BrBG").for_levels(LEV).rgba
+    np.testing.assert_allclose(cb.resolved["lbFillColors"], expected)
+
+
+def test_shared_bar_uses_res_palette_name(make_da, outdir):
+    f = xn.Figure(ncols=2, output=outdir / "respal.png")
+    for ax in f.panels:
+        ax.contour_map(make_da(), levels=LEV, res={"cnFillPalette": "MPL_RdBu"})
+    cb = f.colorbar()
+    f.save()
+    expected = xn.colors.get("MPL_RdBu").for_levels(LEV).rgba
+    np.testing.assert_allclose(cb.resolved["lbFillColors"], expected)
+
+
+def test_one_bar_for_all_rows_adds_no_row_gap(make_da, outdir):
+    f = xn.Figure(2, 2, output=outdir / "nogap.png")
+    for ax in f.panels:
+        ax.contour_map(make_da(), levels=LEV)
+    f.colorbar()
+    f.save()
+    assert f.panel_resolved["nglPanelBottom"] > 0
+    assert "nglPanelYWhiteSpacePercent" not in f.panel_resolved
