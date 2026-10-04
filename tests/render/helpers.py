@@ -1,17 +1,6 @@
 """Test helpers that read PyNGL objects and PNG output."""
 
 import matplotlib.image as mpimg
-import Ngl
-
-
-def viewport(plot):
-    """(x, y, width, height) of a plot in NDC; y is the top edge."""
-    return tuple(Ngl.get_float(plot, k) for k in ("vpXF", "vpYF", "vpWidthF", "vpHeightF"))
-
-
-def text_box(text_obj):
-    """(x, y, width, height) of a text item after the annotation manager placed it."""
-    return tuple(Ngl.get_float(text_obj, k) for k in ("vpXF", "vpYF", "vpWidthF", "vpHeightF"))
 
 
 def region(png, x0, x1, y0, y1):

@@ -1,5 +1,5 @@
 import pytest
-from helpers import text_box, viewport, white_fraction
+from helpers import white_fraction
 
 import xngl as xn
 from xngl.errors import XnglWarning
@@ -21,12 +21,17 @@ def test_strings_follow_panels(make_da, outdir, layout):
     for ax in f.panels:
         ax.contour_map(make_da(), left="L", right="R")
     f.save()
+    tops = set()
     for ax in f.panels:
-        x, y, w, _h = viewport(ax.ngl_plot)
-        lx, ly, _lw, lh = text_box(ax.string_ids["left"])
-        rx, _ry, rw, _rh = text_box(ax.string_ids["right"])
+        x, y, w, _h = ax.frame
+        assert 0 < w < 1 and 0 < y <= 1                              # real geometry was recorded
+        lx, ly, _lw, lh = ax.string_boxes["left"]
+        rx, _ry, rw, _rh = ax.string_boxes["right"]
         assert abs(lx - x) < 0.01 and ly - lh >= y - 0.002          # above the top-left corner
+        assert ly - lh < y + 0.05                                    # close to the frame
         assert abs((rx + rw) - (x + w)) < 0.01                       # right-aligned to the frame
+        tops.add(round(y, 3))
+    assert len(tops) == layout[0]                                    # strings moved with each row
     # a string drawn by mistake at NDC (0, 0) would show in the bottom 1% at the left edge
     assert white_fraction(png, 0.0, 0.03, 0.99, 1.0) == 1.0
 

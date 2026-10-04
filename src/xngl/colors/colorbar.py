@@ -29,10 +29,13 @@ class ColorbarSpec:
     height: float | None = None
     offset: float | None = None
     res: dict = field(default_factory=dict)
+    # set by the renderer after fig.save(): NDC box (x, y_top, width, height) and resources
+    drawn_box: tuple | None = field(default=None, repr=False, compare=False)
+    resolved: dict | None = field(default=None, repr=False, compare=False)
 
     @classmethod
     def option_names(cls) -> set[str]:
-        return {f.name for f in fields(cls)} - {"res"}
+        return {f.name for f in fields(cls)} - {"res", "drawn_box", "resolved"}
 
     @classmethod
     def from_options(cls, options: dict) -> ColorbarSpec:

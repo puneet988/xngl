@@ -17,9 +17,71 @@ def placeholder(wks):
     return Ngl.blank_plot(wks, to_resources(res))
 
 
+TITLE_TOP = 0.93
+
+
 def panel_keyword_res(fig) -> dict:
-    """Panel resources from figure options (extended by later steps)."""
-    return {}
+    """Panel resources from figure options: shared labelbar, tags and title space."""
+    from ..figure import tag_strings
+    from .colorbar import all_panel_group
+
+    r = {}
+    full = all_panel_group(fig)
+    if full is not None:
+        group, spec = full
+        r["nglPanelLabelBar"] = True
+        r.update(spec.to_res(group[0].base.levels))
+        font = fig.style.options("font").get("name")
+        if font:
+            r.setdefault("lbLabelFont", font)
+            r.setdefault("lbTitleFont", font)
+        spec.resolved = dict(r)
+    tags = tag_strings(fig.tags, len(fig.panels))
+    if tags:
+        opts = fig.style.options("tags")
+        r["nglPanelFigureStrings"] = [t if ax.base is not None else ""
+                                      for t, ax in zip(tags, fig.panels, strict=False)]
+        r["nglPanelFigureStringsFontHeightF"] = float(opts.get("font_height", 0.02))
+        r["nglPanelFigureStringsJust"] = opts.get("just", "TopLeft")
+    if fig.title:
+        r["nglPanelTop"] = TITLE_TOP
+    r.update(_group_bar_space(fig, full))
+    return r
+
+
+GROUP_BAR_SPACE = 0.12      # page fraction kept free under the last row / right of last column
+GROUP_BAR_GAP_PERCENT = 30  # extra white space between rows/columns with a bar between them
+
+
+def _group_bar_space(fig, full) -> dict:
+    """Reserve room for group colour bars so they stay on the page."""
+    r = {}
+    for group, spec in fig.colorbars:
+        if full is not None and group is full[0]:
+            continue
+        if spec.orientation == "vertical":
+            if any(ax.index[1] == fig.ncols - 1 for ax in group):
+                r["nglPanelRight"] = 1.0 - GROUP_BAR_SPACE
+            else:
+                r["nglPanelXWhiteSpacePercent"] = GROUP_BAR_GAP_PERCENT
+        else:
+            if any(ax.index[0] == fig.nrows - 1 for ax in group):
+                r["nglPanelBottom"] = GROUP_BAR_SPACE
+            if any(ax.index[0] < fig.nrows - 1 for ax in group):
+                r["nglPanelYWhiteSpacePercent"] = GROUP_BAR_GAP_PERCENT
+    return r
+
+
+def draw_title(wks, fig) -> None:
+    """Figure title centred above the panels (txString in Ngl.panel draws nothing)."""
+    if not fig.title:
+        return
+    opts = fig.style.options("strings")
+    res = {"txFontHeightF": 1.5 * float(opts.get("font_height", 0.02)), "txJust": "CenterCenter"}
+    font = fig.style.options("font").get("name")
+    if font:
+        res["txFont"] = font
+    Ngl.text_ndc(wks, fig.title, 0.5, (1.0 + TITLE_TOP) / 2, to_resources(res))
 
 
 def do_panel(wks, fig, plots: list) -> None:
@@ -28,3 +90,23 @@ def do_panel(wks, fig, plots: list) -> None:
                           locked={"nglFrame": False, "nglPanelSave": True})
     fig.panel_resolved = dict(res)
     Ngl.panel(wks, plots, [fig.nrows, fig.ncols], to_resources(res))
+
+
+def record_geometry(fig) -> None:
+    """Store final NDC geometry on each panel (PyNGL ids are invalid after destroy).
+
+    ``panel.frame`` = (x, y_top, width, height) of the plot frame;
+    ``panel.bbox`` = (top, bottom, left, right) including labels and annotations;
+    ``panel.string_boxes[side]`` = (x, y_top, width, height) of each panel string.
+    """
+    for ax in fig.panels:
+        if ax.base is None or ax.ngl_plot is None:
+            continue
+        p = ax.ngl_plot
+        ax.frame = tuple(float(Ngl.get_float(p, k))
+                         for k in ("vpXF", "vpYF", "vpWidthF", "vpHeightF"))
+        ax.bbox = tuple(float(v) for v in Ngl.get_bounding_box(p))
+        ax.string_boxes = {
+            side: tuple(float(Ngl.get_float(t, k))
+                        for k in ("vpXF", "vpYF", "vpWidthF", "vpHeightF"))
+            for side, t in ax.string_ids.items()}

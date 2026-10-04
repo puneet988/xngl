@@ -49,6 +49,10 @@ class Panel:
         self.string_ids: dict = {}
         self.strings_resolved: dict = {}
         self.ticks_resolved: dict | None = None
+        # final NDC geometry, recorded by the renderer before the workstation closes
+        self.frame: tuple | None = None
+        self.bbox: tuple | None = None
+        self.string_boxes: dict = {}
 
     def __repr__(self) -> str:
         return f"Panel{self.index}"

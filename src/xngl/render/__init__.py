@@ -8,6 +8,7 @@ import Ngl
 from ..errors import RenderError, XnglError
 from ..specs import VectorSpec
 from . import annotations, layout, overlays, plots
+from .colorbar import colorbar_modes, draw_colorbars
 from .workstation import open_workstation, produced_file
 
 
@@ -22,20 +23,6 @@ class _Where:
         if self.panel is None:
             return self.layer
         return f"panel {self.panel}, layer '{self.layer}'"
-
-
-def colorbar_modes(fig) -> dict[tuple[int, int], str]:
-    """'own', 'shared' or 'none' for each panel."""
-    shared = {ax.index for group, _ in fig.colorbars for ax in group}
-    modes = {}
-    for ax in fig.panels:
-        if ax.base is not None and ax.base.colorbar:
-            modes[ax.index] = "own"
-        elif ax.index in shared:
-            modes[ax.index] = "shared"
-        else:
-            modes[ax.index] = "none"
-    return modes
 
 
 def _render_panel(wks, fig, ax, mode, where: _Where):
@@ -79,6 +66,11 @@ def render_figure(fig) -> Path:
             plot_list.append(plot)
         where.panel, where.layer = None, "panel layout"
         layout.do_panel(wks, fig, plot_list)
+        layout.record_geometry(fig)
+        where.layer = "colour bars"
+        draw_colorbars(wks, fig)
+        where.layer = "title"
+        layout.draw_title(wks, fig)
         Ngl.frame(wks)
     except Exception as exc:  # noqa: BLE001 - re-raised below with context
         error = exc
