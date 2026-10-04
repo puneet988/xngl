@@ -49,3 +49,29 @@ def make_da():
         return _latlon_da(values, la, lo, name=name, **attrs)
 
     return _make
+
+
+def global_da(dlon=2.5, dlat=2.5):
+    """Global field: lat -90..90, lon 0..360-dlon."""
+    la = np.arange(-90, 90 + dlat / 2, dlat)
+    lo = np.arange(0, 360, dlon)
+    lon2, lat2 = np.meshgrid(lo, la)
+    return _latlon_da(np.cos(np.radians(lat2)) * np.sin(np.radians(lon2)), la, lo, name="g")
+
+
+def regional_da():
+    """Regional field: lat 0..40, lon 60..100."""
+    la, lo = np.linspace(0, 40, 41), np.linspace(60, 100, 41)
+    lon2, lat2 = np.meshgrid(lo, la)
+    return _latlon_da(np.sin(np.radians(lon2 * 4)) * np.cos(np.radians(lat2 * 4)), la, lo, name="r")
+
+
+def curvilinear_da():
+    """Field on a rotated 2-D grid with nav_lat/nav_lon coordinates on dims y, x."""
+    y, x = np.meshgrid(np.arange(30), np.arange(40), indexing="ij")
+    nav_lat = 10 + 0.8 * y + 0.1 * x
+    nav_lon = 70 + 0.7 * x - 0.1 * y
+    da = xr.DataArray(np.sin(nav_lat / 5) + np.cos(nav_lon / 7), dims=("y", "x"),
+                      coords={"nav_lat": (("y", "x"), nav_lat), "nav_lon": (("y", "x"), nav_lon)},
+                      name="c")
+    return da
