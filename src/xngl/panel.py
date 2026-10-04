@@ -45,6 +45,7 @@ class Panel:
         self.ticks: TicksSpec | None = None
         self.strings = StringsSpec()
         self.ngl_plot = None
+        self.attached: list = []  # PyNGL ids of overlays (kept alive with the plot)
 
     def __repr__(self) -> str:
         return f"Panel{self.index}"

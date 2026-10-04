@@ -8,7 +8,7 @@ import Ngl
 
 from ..errors import RenderError, XnglError
 from ..specs import VectorSpec
-from . import layout, plots
+from . import layout, overlays, plots
 from .workstation import open_workstation, produced_file
 
 
@@ -46,12 +46,16 @@ def _render_panel(wks, fig, ax, mode, where: _Where):
         return layout.placeholder(wks)
     where.layer = "contour_map"
     plot = plots.build_contour(wks, ax.base, fig.style, mode)
+    ax.ngl_plot = plot
+    ax.attached = []
     for layer in ax.layers[1:]:
-        where.layer = layer.name
         if isinstance(layer, VectorSpec):
-            plots.build_vectors(wks, layer, fig.style, plot)
-        else:
-            raise RenderError(f"layer type {layer.name} is not supported yet")
+            where.layer = layer.name
+            ax.attached.append(plots.build_vectors(wks, layer, fig.style, plot))
+    where.layer = "overlays"
+    overlays.add_overlays(wks, plot, ax, fig.style)
+    where.layer = "add_custom"
+    overlays.run_custom(wks, plot, ax)
     return plot
 
 
