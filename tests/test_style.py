@@ -93,3 +93,19 @@ def test_merge_order_and_locked():
 def test_show_text():
     text = show({"strings": {"gap": 0.3}})
     assert "[strings]" in text and "gap = 0.3" in text
+
+
+def test_paper_preset():
+    s = load_style("paper")
+    assert s.options("font")["name"] == "helvetica-bold"
+    assert s.res("contour")["cnInfoLabelOn"] is False and s.options("box")["color"] == "black"
+    assert s.options("ticks")["outward"] is True and s.options("colorbar")["end_caps"] == "triangles"
+    assert s.options("colorbar")["box_lines"] is False and s.options("strings")["font_height"] == 0.018
+    assert s.res("ticks") == {"tmXBMinorOn": False, "tmYLMinorOn": False, "tmBorderThicknessF": 1.5}
+
+
+def test_show_paper_text():
+    import xngl as xn
+
+    text = xn.style.show("paper")
+    assert 'name = "helvetica-bold"' in text and "cnInfoLabelOn = false" in text

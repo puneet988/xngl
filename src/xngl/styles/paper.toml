@@ -1,0 +1,24 @@
+# Built-in "paper" preset: bold fonts, outward ticks, no info label, triangle colour bars.
+
+[font]
+name = "helvetica-bold"
+
+[contour]
+lines = false
+line_labels = false
+[contour.res]
+cnInfoLabelOn = false
+
+[ticks]
+outward = true
+[ticks.res]
+tmXBMinorOn = false
+tmYLMinorOn = false
+tmBorderThicknessF = 1.5
+
+[colorbar]
+box_lines = false
+end_caps = "triangles"
+
+[strings]
+font_height = 0.018
