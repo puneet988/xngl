@@ -12,3 +12,4 @@ dependencies:
   - cftime
   - pytest
   - ruff
+  - matplotlib  # tests only (PNG checks)

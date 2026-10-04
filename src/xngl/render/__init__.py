@@ -1,6 +1,5 @@
 """Rendering: the only package of xngl that imports Ngl (spec section 8.1)."""
 
-from __future__ import annotations
 
 from pathlib import Path
 
@@ -8,7 +7,7 @@ import Ngl
 
 from ..errors import RenderError, XnglError
 from ..specs import VectorSpec
-from . import layout, overlays, plots
+from . import annotations, layout, overlays, plots
 from .workstation import open_workstation, produced_file
 
 
@@ -45,7 +44,8 @@ def _render_panel(wks, fig, ax, mode, where: _Where):
         where.layer = "empty panel"
         return layout.placeholder(wks)
     where.layer = "contour_map"
-    plot = plots.build_contour(wks, ax.base, fig.style, mode)
+    ticks_off = annotations.uses_xngl_ticks(ax, fig.style)
+    plot = plots.build_contour(wks, ax.base, fig.style, mode, ticks_off=ticks_off)
     ax.ngl_plot = plot
     ax.attached = []
     for layer in ax.layers[1:]:
@@ -54,6 +54,10 @@ def _render_panel(wks, fig, ax, mode, where: _Where):
             ax.attached.append(plots.build_vectors(wks, layer, fig.style, plot))
     where.layer = "overlays"
     overlays.add_overlays(wks, plot, ax, fig.style)
+    where.layer = "tick labels"
+    annotations.add_ticks(wks, plot, ax, fig, fig.style)
+    where.layer = "strings"
+    annotations.add_strings(wks, plot, ax, fig.style)
     where.layer = "add_custom"
     overlays.run_custom(wks, plot, ax)
     return plot

@@ -67,15 +67,19 @@ def contour_keyword_res(spec: ContourSpec, style: Style, colorbar_mode: str) -> 
     return r
 
 
-def build_contour(wks, spec: ContourSpec, style: Style, colorbar_mode: str):
+def build_contour(wks, spec: ContourSpec, style: Style, colorbar_mode: str,
+                  ticks_off: bool = False):
     field = spec.field
     if spec.levels is None and np.nanmin(field.values) == np.nanmax(field.values):
         warnings.warn(f"contour_map: field '{field.name}' is constant; no contour levels",
                       XnglWarning, stacklevel=4)
     extra_locked = frozenset({"pmLabelBarDisplayMode"}) if colorbar_mode == "shared" else frozenset()
     locked = {"nglDraw": False, "nglFrame": False, "sfXArray": field.lon, "sfYArray": field.lat}
+    keyword = contour_keyword_res(spec, style, colorbar_mode)
+    if ticks_off:  # xngl draws its own lat/lon labels (blank-plot overlay)
+        keyword["pmTickMarkDisplayMode"] = "Never"
     res = merge_resources(style_res={**style.res("map"), **style.res("contour")},
-                          keyword_res=contour_keyword_res(spec, style, colorbar_mode),
+                          keyword_res=keyword,
                           user_res=spec.res, locked=locked, extra_locked=extra_locked)
     spec.resolved = dict(res)
     plot = Ngl.contour_map(wks, filled(field.values), to_resources(res))

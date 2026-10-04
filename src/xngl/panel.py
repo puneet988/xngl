@@ -46,6 +46,9 @@ class Panel:
         self.strings = StringsSpec()
         self.ngl_plot = None
         self.attached: list = []  # PyNGL ids of overlays (kept alive with the plot)
+        self.string_ids: dict = {}
+        self.strings_resolved: dict = {}
+        self.ticks_resolved: dict | None = None
 
     def __repr__(self) -> str:
         return f"Panel{self.index}"
