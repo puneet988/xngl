@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "xngl"
+version = "0.1.0"
+description = "Publication maps of xarray data with PyNGL, with less boilerplate."
+readme = "README.md"
+requires-python = ">=3.11,<3.12"
+license = "MIT"
+authors = [{ name = "puneet", email = "puneet.988@gmail.com" }]
+# PyNGL and PyNIO are not on PyPI. Install them from conda-forge first (see README).
+dependencies = ["numpy<2", "xarray", "netCDF4", "cftime", "scipy"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+xngl = ["styles/*.toml", "colors/data/*.json"]
+
+[tool.ruff]
+line-length = 100
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = ["render: needs PyNGL drawing"]

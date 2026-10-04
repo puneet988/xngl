@@ -1,0 +1,14 @@
+name: xngl-dev
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - pyngl
+  - pynio
+  - numpy<2
+  - scipy
+  - xarray
+  - netcdf4
+  - cftime
+  - pytest
+  - ruff
