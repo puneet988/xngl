@@ -13,6 +13,9 @@ authors = [{ name = "puneet", email = "puneet.988@gmail.com" }]
 # PyNGL and PyNIO are not on PyPI. Install them from conda-forge first (see README).
 dependencies = ["numpy<2", "xarray", "netCDF4", "cftime", "scipy"]
 
+[project.entry-points."xarray.backends"]
+pynio = "xngl.io.backend:PynioBackend"
+
 [tool.setuptools.packages.find]
 where = ["src"]
 
