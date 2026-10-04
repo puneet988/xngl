@@ -37,3 +37,9 @@ def test_from_options_unknown_key():
     with pytest.raises(StyleError, match="end_cap.*valid"):
         ColorbarSpec.from_options({"end_cap": "triangles"})
     assert ColorbarSpec.from_options({"label_stride": 3}).label_stride == 3
+
+
+def test_font_height_options():
+    r = ColorbarSpec(label_font_height=0.013, title_font_height=0.02).to_res()
+    assert r["lbLabelFontHeightF"] == 0.013 and r["lbTitleFontHeightF"] == 0.02
+    assert "lbLabelFontHeightF" not in ColorbarSpec().to_res()

@@ -28,4 +28,5 @@ def open_workstation(fig):
         keyword.update(wkPaperWidthF=float(fig.size[0]), wkPaperHeightF=float(fig.size[1]))
     res = merge_resources(style_res=fig.style.res("workstation"), keyword_res=keyword,
                           user_res={}, locked={})
+    fig.workstation_resolved = dict(res)
     return Ngl.open_wks(fig.format, output_stem(fig.output), to_resources(res))

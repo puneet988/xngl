@@ -1,4 +1,4 @@
-"""Colour bars: modes per panel, the shared all-panel labelbar, and group labelbars."""
+"""Colour bars: modes per panel and shared colour bars drawn with Ngl.labelbar_ndc."""
 
 from __future__ import annotations
 
@@ -7,7 +7,6 @@ import warnings
 import Ngl
 import numpy as np
 
-from ..colors.colorbar import ColorbarSpec
 from ..errors import RenderError, XnglWarning
 from .util import to_resources
 
@@ -31,15 +30,6 @@ def colorbar_modes(fig) -> dict[tuple[int, int], str]:
     return modes
 
 
-def all_panel_group(fig) -> tuple[list, ColorbarSpec] | None:
-    """The colour bar group that covers every panel with a plot, if there is one."""
-    drawn = {ax.index for ax in fig.panels if ax.base is not None}
-    for group, spec in fig.colorbars:
-        if {ax.index for ax in group} == drawn:
-            return group, spec
-    return None
-
-
 def _palette(first) -> np.ndarray:
     spec = first.base
     if spec.cmap is not None:
@@ -48,11 +38,8 @@ def _palette(first) -> np.ndarray:
 
 
 def draw_colorbars(wks, fig) -> None:
-    """Draw every group colour bar that does not cover all panels (Ngl.labelbar_ndc)."""
-    full = all_panel_group(fig)
+    """Draw every shared colour bar with Ngl.labelbar_ndc, below (or right of) its panels."""
     for group, spec in fig.colorbars:
-        if full is not None and group is full[0]:
-            continue
         boxes = np.array([Ngl.get_bounding_box(ax.ngl_plot) for ax in group])  # top,bottom,l,r
         frames = [(Ngl.get_float(ax.ngl_plot, "vpXF"), Ngl.get_float(ax.ngl_plot, "vpYF"),
                    Ngl.get_float(ax.ngl_plot, "vpWidthF"), Ngl.get_float(ax.ngl_plot, "vpHeightF"))

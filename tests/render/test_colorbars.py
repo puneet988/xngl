@@ -27,15 +27,25 @@ def test_own_colorbars(make_da, outdir):
 
 
 def test_one_colorbar_all_panels(make_da, outdir):
+    # drawn by xngl (labelbar_ndc) below all panels, not by nglPanelLabelBar, which overlaps
+    # the xngl tick labels and scales fonts too large
     f = xn.Figure(ncols=3, output=outdir / "all.png", tags="a)")
-    cs = [ax.contour_map(make_da(), levels=LEV, cmap="BlueYellowRed") for ax in f.panels]
-    f.colorbar(label="T", end_caps="triangles")
+    cs = []
+    for ax in f.panels:
+        cs.append(ax.contour_map(make_da(), levels=LEV, cmap="BlueYellowRed"))
+        ax.set_ticks(lon=10, lat=10)
+    cb = f.colorbar(label="T", end_caps="triangles", label_font_height=0.015,
+                    title_font_height=0.02)
     f.save()
     p = f.panel_resolved
-    assert p["nglPanelLabelBar"] and p["lbBoxEndCapStyle"] == "TriangleBothEnds"
-    assert p["lbTitleString"] == "T" and p["nglPanelFigureStrings"] == ["a)", "b)", "c)"]
-    assert p["nglPanelFigureStringsJust"] == "TopLeft"
+    assert "nglPanelLabelBar" not in p and not any(k.startswith("lb") for k in p)
+    assert p["nglPanelFigureStrings"] == ["a)", "b)", "c)"]
+    assert p["nglPanelFigureStringsJust"] == "TopLeft" and p["nglPanelBottom"] > 0
     assert all(c.resolved_res()["lbLabelBarOn"] is False for c in cs)
+    _x, y, _w, h = cb.drawn_box
+    assert y < min(ax.bbox[1] for ax in f.panels) and y - h >= 0
+    assert cb.resolved["lbBoxEndCapStyle"] == "TriangleBothEnds" and cb.resolved["lbTitleString"] == "T"
+    assert cb.resolved["lbLabelFontHeightF"] == 0.015 and cb.resolved["lbTitleFontHeightF"] == 0.02
 
 
 def test_group_colorbars_per_row(make_da, outdir):

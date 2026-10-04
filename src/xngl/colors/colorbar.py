@@ -28,6 +28,8 @@ class ColorbarSpec:
     width: float | None = None
     height: float | None = None
     offset: float | None = None
+    label_font_height: float | None = None
+    title_font_height: float | None = None
     res: dict = field(default_factory=dict)
     # set by the renderer after fig.save(): NDC box (x, y_top, width, height) and resources
     drawn_box: tuple | None = field(default=None, repr=False, compare=False)
@@ -65,6 +67,10 @@ class ColorbarSpec:
             "lbRasterFillOn": bool(self.raster_fill),
             "lbTitlePosition": POSITIONS[self.title_position],
         }
+        if self.label_font_height is not None:
+            r["lbLabelFontHeightF"] = float(self.label_font_height)
+        if self.title_font_height is not None:
+            r["lbTitleFontHeightF"] = float(self.title_font_height)
         if self.label:
             r["lbTitleOn"] = True
             r["lbTitleString"] = self.label

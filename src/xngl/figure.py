@@ -55,6 +55,7 @@ class Figure:
         self.colorbars: list[tuple[list[Panel], ColorbarSpec]] = []
         self.wks = None
         self.panel_resolved: dict | None = None
+        self.workstation_resolved: dict | None = None
 
     def __getitem__(self, idx) -> Panel:
         r, c = idx

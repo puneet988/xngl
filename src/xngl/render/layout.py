@@ -21,21 +21,9 @@ TITLE_TOP = 0.93
 
 
 def panel_keyword_res(fig) -> dict:
-    """Panel resources from figure options: shared labelbar, tags and title space."""
+    """Panel resources from figure options: tags, title space and colour bar space."""
     from ..figure import tag_strings
-    from .colorbar import all_panel_group
-
     r = {}
-    full = all_panel_group(fig)
-    if full is not None:
-        group, spec = full
-        r["nglPanelLabelBar"] = True
-        r.update(spec.to_res(group[0].base.levels))
-        font = fig.style.options("font").get("name")
-        if font:
-            r.setdefault("lbLabelFont", font)
-            r.setdefault("lbTitleFont", font)
-        spec.resolved = dict(r)
     tags = tag_strings(fig.tags, len(fig.panels))
     if tags:
         opts = fig.style.options("tags")
@@ -45,7 +33,7 @@ def panel_keyword_res(fig) -> dict:
         r["nglPanelFigureStringsJust"] = opts.get("just", "TopLeft")
     if fig.title:
         r["nglPanelTop"] = TITLE_TOP
-    r.update(_group_bar_space(fig, full))
+    r.update(_group_bar_space(fig))
     return r
 
 
@@ -53,12 +41,10 @@ GROUP_BAR_SPACE = 0.12      # page fraction kept free under the last row / right
 GROUP_BAR_GAP_PERCENT = 30  # extra white space between rows/columns with a bar between them
 
 
-def _group_bar_space(fig, full) -> dict:
-    """Reserve room for group colour bars so they stay on the page."""
+def _group_bar_space(fig) -> dict:
+    """Reserve room for shared colour bars so they stay on the page."""
     r = {}
     for group, spec in fig.colorbars:
-        if full is not None and group is full[0]:
-            continue
         if spec.orientation == "vertical":
             if any(ax.index[1] == fig.ncols - 1 for ax in group):
                 r["nglPanelRight"] = 1.0 - GROUP_BAR_SPACE

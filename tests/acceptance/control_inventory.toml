@@ -1,0 +1,760 @@
+# Every resource and Ngl call used in the 4 plotting scripts of spec section 1.2, and the
+# xngl level that covers it: keyword | style | res | hook | internal. Generated on 2026-10-04
+# from a grep of those scripts (125 resources, 14 Ngl calls). test_control.py checks each entry.
+
+[[resource]]
+name = "cnFillMode"
+level = "keyword"
+option = "Panel.contour_map:fill"
+
+[[resource]]
+name = "cnFillOn"
+level = "internal"
+module = "render/plots.py"
+
+[[resource]]
+name = "cnFillPalette"
+level = "keyword"
+option = "Panel.contour_map:cmap"
+
+[[resource]]
+name = "cnInfoLabelOn"
+level = "res"
+where = "contour"
+value = false
+
+[[resource]]
+name = "cnLabelBarEndStyle"
+level = "res"
+where = "contour"
+value = "ExcludeOuterBoxes"
+
+[[resource]]
+name = "cnLevelSelectionMode"
+level = "keyword"
+option = "Panel.contour_map:levels"
+
+[[resource]]
+name = "cnLevelSpacingF"
+level = "res"
+where = "contour"
+value = 0.2
+
+[[resource]]
+name = "cnLevels"
+level = "keyword"
+option = "Panel.contour_map:levels"
+
+[[resource]]
+name = "cnLineLabelsOn"
+level = "style"
+option = "contour.line_labels"
+
+[[resource]]
+name = "cnLinesOn"
+level = "style"
+option = "contour.lines"
+
+[[resource]]
+name = "cnMaxLevelCount"
+level = "res"
+where = "contour"
+value = 255
+
+[[resource]]
+name = "cnMaxLevelValF"
+level = "res"
+where = "contour"
+value = 1.0
+
+[[resource]]
+name = "cnMinLevelValF"
+level = "res"
+where = "contour"
+value = -1.0
+
+[[resource]]
+name = "cnRasterCellSizeF"
+level = "res"
+where = "contour"
+value = 0.005
+
+[[resource]]
+name = "cnRasterSmoothingOn"
+level = "res"
+where = "contour"
+value = true
+
+[[resource]]
+name = "gsEdgeColor"
+level = "res"
+where = "shapefile"
+value = "black"
+
+[[resource]]
+name = "gsEdgesOn"
+level = "res"
+where = "shapefile"
+value = true
+
+[[resource]]
+name = "gsLineColor"
+level = "keyword"
+option = "Panel.add_shapefile:color"
+
+[[resource]]
+name = "gsLineThicknessF"
+level = "keyword"
+option = "Panel.add_shapefile:thickness"
+
+[[resource]]
+name = "gsMarkerIndex"
+level = "keyword"
+option = "Panel.stipple:marker"
+
+[[resource]]
+name = "gsMarkerSizeF"
+level = "keyword"
+option = "Panel.stipple:size"
+
+[[resource]]
+name = "gsSegments"
+level = "internal"
+module = "render/overlays.py"
+
+[[resource]]
+name = "lbBoxEndCapStyle"
+level = "keyword"
+option = "ColorbarSpec:end_caps"
+
+[[resource]]
+name = "lbBoxLineThicknessF"
+level = "res"
+where = "colorbar"
+value = 1.0
+
+[[resource]]
+name = "lbBoxLinesOn"
+level = "keyword"
+option = "ColorbarSpec:box_lines"
+
+[[resource]]
+name = "lbFillColors"
+level = "internal"
+module = "render/colorbar.py"
+
+[[resource]]
+name = "lbLabelAlignment"
+level = "internal"
+module = "render/colorbar.py"
+
+[[resource]]
+name = "lbLabelAngleF"
+level = "keyword"
+option = "ColorbarSpec:label_angle"
+
+[[resource]]
+name = "lbLabelAutoStride"
+level = "internal"
+module = "colors/colorbar.py"
+
+[[resource]]
+name = "lbLabelFont"
+level = "style"
+option = "font.name"
+
+[[resource]]
+name = "lbLabelFontHeightF"
+level = "keyword"
+option = "ColorbarSpec:label_font_height"
+
+[[resource]]
+name = "lbMonoFillPattern"
+level = "internal"
+module = "render/colorbar.py"
+
+[[resource]]
+name = "lbOrientation"
+level = "keyword"
+option = "ColorbarSpec:orientation"
+
+[[resource]]
+name = "lbPerimOn"
+level = "internal"
+module = "render/colorbar.py"
+
+[[resource]]
+name = "lbPerimThicknessF"
+level = "res"
+where = "colorbar"
+value = 1.0
+
+[[resource]]
+name = "lbRasterFillOn"
+level = "keyword"
+option = "ColorbarSpec:raster_fill"
+
+[[resource]]
+name = "lbTitleFont"
+level = "style"
+option = "font.name"
+
+[[resource]]
+name = "lbTitleFontHeightF"
+level = "keyword"
+option = "ColorbarSpec:title_font_height"
+
+[[resource]]
+name = "lbTitleOffsetF"
+level = "res"
+where = "colorbar"
+value = 0.15
+
+[[resource]]
+name = "lbTitleOn"
+level = "keyword"
+option = "ColorbarSpec:label"
+
+[[resource]]
+name = "lbTitlePosition"
+level = "keyword"
+option = "ColorbarSpec:title_position"
+
+[[resource]]
+name = "lbTitleString"
+level = "keyword"
+option = "ColorbarSpec:label"
+
+[[resource]]
+name = "mpFillOn"
+level = "res"
+where = "contour"
+value = false
+
+[[resource]]
+name = "mpGridAndLimbOn"
+level = "res"
+where = "contour"
+value = false
+
+[[resource]]
+name = "mpLimitMode"
+level = "internal"
+module = "render/plots.py"
+
+[[resource]]
+name = "mpMaxLatF"
+level = "keyword"
+option = "Panel.contour_map:lat"
+
+[[resource]]
+name = "mpMaxLonF"
+level = "keyword"
+option = "Panel.contour_map:lon"
+
+[[resource]]
+name = "mpMinLatF"
+level = "keyword"
+option = "Panel.contour_map:lat"
+
+[[resource]]
+name = "mpMinLonF"
+level = "keyword"
+option = "Panel.contour_map:lon"
+
+[[resource]]
+name = "mpOutlineBoundarySets"
+level = "res"
+where = "contour"
+value = "NoBoundaries"
+
+[[resource]]
+name = "mpOutlineOn"
+level = "res"
+where = "contour"
+value = false
+
+[[resource]]
+name = "nglDraw"
+level = "internal"
+module = "render/plots.py"
+
+[[resource]]
+name = "nglFrame"
+level = "internal"
+module = "render/plots.py"
+
+[[resource]]
+name = "nglMaximize"
+level = "res"
+where = "contour"
+value = false
+
+[[resource]]
+name = "nglPanelBottom"
+level = "res"
+where = "panel"
+value = 0.1
+
+[[resource]]
+name = "nglPanelCenter"
+level = "res"
+where = "panel"
+value = false
+
+[[resource]]
+name = "nglPanelRight"
+level = "res"
+where = "panel"
+value = 0.98
+
+[[resource]]
+name = "nglPanelXWhiteSpacePercent"
+level = "res"
+where = "panel"
+value = 6
+
+[[resource]]
+name = "nglPanelYWhiteSpacePercent"
+level = "res"
+where = "panel"
+value = 20
+
+[[resource]]
+name = "nglPaperOrientation"
+level = "res"
+where = "panel"
+value = "portrait"
+
+[[resource]]
+name = "nglPointTickmarksOutward"
+level = "style"
+option = "ticks.outward"
+
+[[resource]]
+name = "pmLabelBarDisplayMode"
+level = "internal"
+module = "render/plots.py"
+
+[[resource]]
+name = "pmTickMarkDisplayMode"
+level = "internal"
+module = "render/plots.py"
+
+[[resource]]
+name = "sfXCEndV"
+level = "internal"
+module = "render/plots.py"
+replaced_by = "sfXArray"
+
+[[resource]]
+name = "sfXCStartV"
+level = "internal"
+module = "render/plots.py"
+replaced_by = "sfXArray"
+
+[[resource]]
+name = "sfYCEndV"
+level = "internal"
+module = "render/plots.py"
+replaced_by = "sfYArray"
+
+[[resource]]
+name = "sfYCStartV"
+level = "internal"
+module = "render/plots.py"
+replaced_by = "sfYArray"
+
+[[resource]]
+name = "tfDoNDCOverlay"
+level = "internal"
+module = "render/annotations.py"
+
+[[resource]]
+name = "tiMainFont"
+level = "style"
+option = "font.name"
+
+[[resource]]
+name = "tiMainFontHeightF"
+level = "res"
+where = "contour"
+value = 0.02
+
+[[resource]]
+name = "tiMainString"
+level = "res"
+where = "contour"
+value = "title"
+
+[[resource]]
+name = "tmBorderThicknessF"
+level = "res"
+where = "ticks"
+value = 2.0
+
+[[resource]]
+name = "tmLabelAutoStride"
+level = "res"
+where = "ticks"
+value = true
+
+[[resource]]
+name = "tmXBLabelFont"
+level = "style"
+option = "font.name"
+
+[[resource]]
+name = "tmXBLabelFontHeightF"
+level = "style"
+option = "ticks.label_font_height"
+
+[[resource]]
+name = "tmXBLabels"
+level = "keyword"
+option = "Panel.set_ticks:lon"
+
+[[resource]]
+name = "tmXBLabelsOn"
+level = "style"
+option = "ticks.outer_only"
+
+[[resource]]
+name = "tmXBMajorLengthF"
+level = "res"
+where = "ticks"
+value = -0.015
+
+[[resource]]
+name = "tmXBMajorThicknessF"
+level = "res"
+where = "ticks"
+value = 1.3
+
+[[resource]]
+name = "tmXBMinorLengthF"
+level = "res"
+where = "ticks"
+value = -0.0055
+
+[[resource]]
+name = "tmXBMinorOn"
+level = "res"
+where = "ticks"
+value = false
+
+[[resource]]
+name = "tmXBMode"
+level = "keyword"
+option = "Panel.set_ticks:lon"
+
+[[resource]]
+name = "tmXBValues"
+level = "keyword"
+option = "Panel.set_ticks:lon"
+
+[[resource]]
+name = "tmXTMajorLengthF"
+level = "res"
+where = "ticks"
+value = -0.015
+
+[[resource]]
+name = "tmXTMinorOn"
+level = "res"
+where = "ticks"
+value = false
+
+[[resource]]
+name = "tmYLLabelFont"
+level = "style"
+option = "font.name"
+
+[[resource]]
+name = "tmYLLabelFontHeightF"
+level = "style"
+option = "ticks.label_font_height"
+
+[[resource]]
+name = "tmYLLabels"
+level = "keyword"
+option = "Panel.set_ticks:lat"
+
+[[resource]]
+name = "tmYLLabelsOn"
+level = "style"
+option = "ticks.outer_only"
+
+[[resource]]
+name = "tmYLMajorLengthF"
+level = "res"
+where = "ticks"
+value = -0.015
+
+[[resource]]
+name = "tmYLMajorThicknessF"
+level = "res"
+where = "ticks"
+value = 1.3
+
+[[resource]]
+name = "tmYLMinorOn"
+level = "res"
+where = "ticks"
+value = false
+
+[[resource]]
+name = "tmYLMode"
+level = "keyword"
+option = "Panel.set_ticks:lat"
+
+[[resource]]
+name = "tmYLValues"
+level = "keyword"
+option = "Panel.set_ticks:lat"
+
+[[resource]]
+name = "tmYRMajorLengthF"
+level = "res"
+where = "ticks"
+value = -0.015
+
+[[resource]]
+name = "tmYRMinorOn"
+level = "res"
+where = "ticks"
+value = false
+
+[[resource]]
+name = "trXMaxF"
+level = "internal"
+module = "render/annotations.py"
+
+[[resource]]
+name = "trXMinF"
+level = "internal"
+module = "render/annotations.py"
+
+[[resource]]
+name = "trYMaxF"
+level = "internal"
+module = "render/annotations.py"
+
+[[resource]]
+name = "trYMinF"
+level = "internal"
+module = "render/annotations.py"
+
+[[resource]]
+name = "txFont"
+level = "style"
+option = "font.name"
+
+[[resource]]
+name = "txFontHeightF"
+level = "style"
+option = "strings.font_height"
+
+[[resource]]
+name = "vcFillArrowEdgeColor"
+level = "res"
+where = "vectors"
+value = "black"
+
+[[resource]]
+name = "vcFillArrowsOn"
+level = "res"
+where = "vectors"
+value = true
+
+[[resource]]
+name = "vcGlyphStyle"
+level = "res"
+where = "vectors"
+value = "CurlyVector"
+
+[[resource]]
+name = "vcLineArrowThicknessF"
+level = "keyword"
+option = "Panel.vectors:thickness"
+
+[[resource]]
+name = "vcMinDistanceF"
+level = "res"
+where = "vectors"
+value = 0.02
+
+[[resource]]
+name = "vcMinFracLengthF"
+level = "res"
+where = "vectors"
+value = 0.2
+
+[[resource]]
+name = "vcMonoFillArrowFillColor"
+level = "res"
+where = "vectors"
+value = true
+
+[[resource]]
+name = "vcRefAnnoFontHeightF"
+level = "res"
+where = "vectors"
+value = 0.01
+
+[[resource]]
+name = "vcRefAnnoOn"
+level = "keyword"
+option = "Panel.vectors:ref_label"
+
+[[resource]]
+name = "vcRefAnnoOrthogonalPosF"
+level = "res"
+where = "vectors"
+value = -0.1
+
+[[resource]]
+name = "vcRefAnnoParallelPosF"
+level = "res"
+where = "vectors"
+value = 1.0
+
+[[resource]]
+name = "vcRefAnnoPerimOn"
+level = "res"
+where = "vectors"
+value = false
+
+[[resource]]
+name = "vcRefLengthF"
+level = "res"
+where = "vectors"
+value = 0.05
+
+[[resource]]
+name = "vcRefMagnitudeF"
+level = "keyword"
+option = "Panel.vectors:ref_magnitude"
+
+[[resource]]
+name = "vpHeightF"
+level = "internal"
+module = "render/annotations.py"
+
+[[resource]]
+name = "vpWidthF"
+level = "internal"
+module = "render/annotations.py"
+
+[[resource]]
+name = "vpXF"
+level = "internal"
+module = "render/annotations.py"
+
+[[resource]]
+name = "vpYF"
+level = "internal"
+module = "render/annotations.py"
+
+[[resource]]
+name = "wkHeight"
+level = "keyword"
+option = "Figure:width"
+
+[[resource]]
+name = "wkOrientation"
+level = "res"
+where = "workstation"
+value = "portrait"
+
+[[resource]]
+name = "wkPaperHeightF"
+level = "keyword"
+option = "Figure:size"
+
+[[resource]]
+name = "wkPaperWidthF"
+level = "keyword"
+option = "Figure:size"
+
+[[resource]]
+name = "wkWidth"
+level = "keyword"
+option = "Figure:width"
+
+[[call]]
+name = "Ngl.add_polyline"
+level = "internal"
+module = "render/overlays.py"
+
+[[call]]
+name = "Ngl.add_polymarker"
+level = "internal"
+module = "render/overlays.py"
+
+[[call]]
+name = "Ngl.blank_plot"
+level = "internal"
+module = "render/annotations.py"
+
+[[call]]
+name = "Ngl.contour_map"
+level = "internal"
+module = "render/plots.py"
+
+[[call]]
+name = "Ngl.end"
+level = "internal"
+module = "render/__init__.py"
+replaced_by = "Ngl.destroy"
+
+[[call]]
+name = "Ngl.frame"
+level = "internal"
+module = "render/__init__.py"
+
+[[call]]
+name = "Ngl.get_float"
+level = "internal"
+module = "render/annotations.py"
+
+[[call]]
+name = "Ngl.get_string_array"
+level = "internal"
+module = "render/colorbar.py"
+replaced_by = "get_integer_array"
+
+[[call]]
+name = "Ngl.labelbar_ndc"
+level = "internal"
+module = "render/colorbar.py"
+
+[[call]]
+name = "Ngl.open_wks"
+level = "internal"
+module = "render/workstation.py"
+
+[[call]]
+name = "Ngl.overlay"
+level = "internal"
+module = "render/plots.py"
+
+[[call]]
+name = "Ngl.panel"
+level = "internal"
+module = "render/layout.py"
+
+[[call]]
+name = "Ngl.text_ndc"
+level = "internal"
+module = "render/annotations.py"
+
+[[call]]
+name = "Ngl.vector"
+level = "internal"
+module = "render/plots.py"
+
+# Any other Ngl call (for example free text with Ngl.text_ndc) is available through a hook.
+[[call]]
+name = "Ngl.* (any other call)"
+level = "hook"
