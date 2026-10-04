@@ -107,7 +107,7 @@ src/xngl/
 └── io/                  ← the only modules that import Nio
     ├── backend.py       xarray backend engine="pynio" (read-only)
     ├── shapefile.py     shapefile → lon, lat, segments (cached)
-    └── colormap_files.py  reads NCL .rgb/.gp colormap files
+    └── colormap_files.py  reads NCL colormap files (.rgb, .gp, .ncmap); no Nio needed
 ```
 
 ### 4.2 Data flow
@@ -231,7 +231,7 @@ from xngl import colors as xc
 
 xc.get("BlueYellowRed")              # NCL built-in colormap (about 300)
 xc.get("cb_BrBG")                    # custom colormaps from map_funcs.py, built in
-xc.get("path/to/precip.rgb")         # NCL .rgb or .gp file
+xc.get("path/to/precip.rgb")         # NCL .rgb, .gp or .ncmap file
 xc.from_colors(["navy", "white", "darkred"], n=21)   # interpolate named colours
 xc.from_array(rgb_or_rgba_array)
 
@@ -254,6 +254,8 @@ Rules:
 2. The custom colormaps from `map_funcs.py` (`cb_*`, `ck_*`) are stored without the old NCL background and foreground entries (the first two rows).
 3. An unknown name raises a `StyleError` that lists close matches.
 4. `cm.for_levels(levels)` with an odd number of colours puts the middle colour at the middle interval. With symmetric levels around zero, zero gets the middle colour.
+5. Built-in colormaps are read from the PyNGL install (`ngl/ncarg/colormaps`: 270 `.rgb`, 22 `.gp`, 8 `.ncmap` files on 2026-10-04). The reader accepts values from 0 to 255 and from 0 to 1, and `ncolors=` headers and `#` comments.
+6. `xc.show()` draws through `render/`, because it needs PyNGL. All other functions in `xngl.colors` work without PyNGL.
 
 ### 6.2 Levels (`levels.py`)
 
