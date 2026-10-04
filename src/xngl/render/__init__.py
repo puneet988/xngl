@@ -7,6 +7,7 @@ from pathlib import Path
 import Ngl
 
 from ..errors import RenderError, XnglError
+from ..specs import VectorSpec
 from . import layout, plots
 from .workstation import open_workstation, produced_file
 
@@ -47,7 +48,10 @@ def _render_panel(wks, fig, ax, mode, where: _Where):
     plot = plots.build_contour(wks, ax.base, fig.style, mode)
     for layer in ax.layers[1:]:
         where.layer = layer.name
-        raise RenderError(f"layer type {layer.name} is not supported yet")
+        if isinstance(layer, VectorSpec):
+            plots.build_vectors(wks, layer, fig.style, plot)
+        else:
+            raise RenderError(f"layer type {layer.name} is not supported yet")
     return plot
 
 

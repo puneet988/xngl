@@ -10,7 +10,7 @@ import numpy as np
 from ..colors.colorbar import ColorbarSpec
 from ..coords import default_label
 from ..errors import RenderError, XnglWarning
-from ..specs import ContourSpec
+from ..specs import ContourSpec, VectorSpec
 from ..style import Style, merge_resources
 from .util import MISSING, filled, to_resources
 
@@ -82,3 +82,36 @@ def build_contour(wks, spec: ContourSpec, style: Style, colorbar_mode: str):
     if plot is None:
         raise RenderError("Ngl.contour_map returned no plot")
     return plot
+
+
+def vector_keyword_res(spec: VectorSpec, style: Style) -> dict:
+    opts = style.options("vectors")
+    r = {
+        "vcLineArrowColor": spec.color or opts.get("color", "black"),
+        "vcLineArrowThicknessF": float(spec.thickness or opts.get("thickness", 1.0)),
+        "vfMissingUValueV": MISSING,
+        "vfMissingVValueV": MISSING,
+        "vcRefAnnoOn": spec.ref_label is not None,
+    }
+    if spec.stride:
+        r.update(vfXCStride=int(spec.stride), vfYCStride=int(spec.stride))
+    if spec.ref_magnitude is not None:
+        r["vcRefMagnitudeF"] = float(spec.ref_magnitude)
+    if spec.ref_label is not None:
+        r["vcRefAnnoString1"] = spec.ref_label
+    return r
+
+
+def build_vectors(wks, spec: VectorSpec, style: Style, base_plot):
+    """Ngl.vector on the u/v grid, overlaid on the panel's base plot."""
+    locked = {"nglDraw": False, "nglFrame": False}
+    keyword = vector_keyword_res(spec, style)
+    keyword.update(vfXArray=spec.u.lon, vfYArray=spec.u.lat)
+    res = merge_resources(style_res=style.res("vectors"), keyword_res=keyword,
+                          user_res=spec.res, locked=locked)
+    spec.resolved = dict(res)
+    vec = Ngl.vector(wks, filled(spec.u.values), filled(spec.v.values), to_resources(res))
+    if vec is None:
+        raise RenderError("Ngl.vector returned no plot")
+    Ngl.overlay(base_plot, vec)
+    return vec
