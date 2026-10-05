@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
+import warnings
+
 import Ngl
 
+from ..errors import XnglWarning
 from ..style import merge_resources
 from .util import to_resources
 
@@ -82,10 +85,93 @@ def draw_title(wks, fig) -> None:
     fig.title_resolved = {**res, "y": float(y)}
 
 
+def panel_resources(fig) -> dict:
+    return merge_resources(style_res=fig.style.res("panel"), keyword_res=panel_keyword_res(fig),
+                           user_res=fig.panel_res,
+                           locked={"nglFrame": False, "nglPanelSave": True})
+
+
+TEXT_FIT_PASSES = 4
+TEXT_FIT_TOLERANCE = 0.005   # relative
+MIN_FRAME_RATIO = 0.6        # the fit never makes a plot narrower than this x its width without it
+
+
+def _text_targets(fig) -> list[tuple]:
+    """(PyNGL id, resource, page height) for text sized by an xngl font-height option.
+
+    Raw resources (ticks.res) keep their PyNGL meaning and are not changed.
+    """
+    strings_h = float(fig.style.options("strings").get("font_height", 0.02))
+    ticks_h = float(fig.style.options("ticks").get("label_font_height", 0.016))
+    tick_keys = ("tmXBLabelFontHeightF", "tmYLLabelFontHeightF")
+    # the blank plot keeps XB and YL equal (tmEqualizeXYSizes), so one raw key means both
+    raw_ticks = any(k in fig.style.res("ticks") for k in tick_keys)
+    out = []
+    for ax in fig.panels:
+        out += [(t, "txFontHeightF", strings_h) for t in ax.string_ids.values()]
+        if ax.tick_id is not None and not raw_ticks:
+            out += [(ax.tick_id, k, ticks_h) for k in tick_keys]
+    return out
+
+
+def fit_text(wks, fig, plots: list) -> None:
+    """Make panel strings and tick labels the requested height on the page.
+
+    Ngl.panel shrinks each plot and the text attached to it (by about 4 in a 1x4 layout).
+    A layout pass with nglDraw=False resizes the plots without drawing.
+
+    Let u be the text height divided by the page height, relative to the plot width W
+    (text = h * u * W). Larger text makes the panel boxes larger, so Ngl.panel makes W
+    smaller; 1/W is close to linear in u. We need u * W = 1. A secant step on
+    1/W = a + b*u gives u = a / (1 - b), which needs about 2 passes.
+    """
+    targets = _text_targets(fig)
+    ref = next((p for p, ax in zip(plots, fig.panels, strict=True) if ax.base is not None), None)
+    if not targets or ref is None:
+        return
+    # Ngl.panel attaches tags (and a panel label bar) to the plots on every call, so the
+    # layout passes leave them out; they sit inside the plots and do not change the layout
+    res = {k: v for k, v in panel_resources(fig).items()
+           if not k.startswith("nglPanelFigureStrings")}
+    res = to_resources({**res, "nglDraw": False, "nglPanelLabelBar": False})
+    dims = [fig.nrows, fig.ncols]
+
+    def layout_pass(u):
+        if u is not None:
+            w = Ngl.get_float(ref, "vpWidthF")
+            for obj, key, h in targets:
+                Ngl.set_values(obj, to_resources({key: h * u * w}))
+        Ngl.panel(wks, plots, dims, res)
+        return Ngl.get_float(ref, "vpWidthF")
+
+    obj0, key0, h0 = targets[0]
+    w0 = layout_pass(None)
+    history = [(Ngl.get_float(obj0, key0) / (h0 * w0), 1.0 / w0)]   # (u, 1/W)
+    u = 1.0 / w0
+    for _ in range(TEXT_FIT_PASSES):
+        w = layout_pass(u)
+        history.append((u, 1.0 / w))
+        if abs(u * w - 1.0) < TEXT_FIT_TOLERANCE and w >= MIN_FRAME_RATIO * w0:
+            return
+        (u0, i0), (u1, i1) = history[-2:]
+        b = (i1 - i0) / (u1 - u0) if u1 != u0 else 0.0
+        a = i1 - b * u1
+        u = a / (1.0 - b) if b < 1.0 and a > 0 else None
+        if u is None or w < MIN_FRAME_RATIO * w0:
+            break
+    # No stable size, or the plots would get too small: the text is too large for the
+    # layout (e.g. a long string in a narrow panel). Use the text size that leaves the
+    # plots at MIN_FRAME_RATIO of their width, from the same linear model.
+    u = (1.0 / (MIN_FRAME_RATIO * w0) - a) / b if b > 0 else history[1][0]
+    layout_pass(u)
+    warnings.warn("panel strings and tick labels do not fit the panel layout at their "
+                  "font_height (page fraction); they are drawn smaller. Reduce [strings] "
+                  "font_height or [ticks] label_font_height, or use shorter strings",
+                  XnglWarning, stacklevel=4)
+
+
 def do_panel(wks, fig, plots: list) -> None:
-    res = merge_resources(style_res=fig.style.res("panel"), keyword_res=panel_keyword_res(fig),
-                          user_res=fig.panel_res,
-                          locked={"nglFrame": False, "nglPanelSave": True})
+    res = panel_resources(fig)
     fig.panel_resolved = dict(res)
     Ngl.panel(wks, plots, [fig.nrows, fig.ncols], to_resources(res))
 
@@ -108,3 +194,8 @@ def record_geometry(fig) -> None:
             side: tuple(float(Ngl.get_float(t, k))
                         for k in ("vpXF", "vpYF", "vpWidthF", "vpHeightF"))
             for side, t in ax.string_ids.items()}
+        ax.text_heights = {side: float(Ngl.get_float(t, "txFontHeightF"))
+                           for side, t in ax.string_ids.items()}
+        if ax.tick_id is not None:
+            ax.text_heights["lon"] = float(Ngl.get_float(ax.tick_id, "tmXBLabelFontHeightF"))
+            ax.text_heights["lat"] = float(Ngl.get_float(ax.tick_id, "tmYLLabelFontHeightF"))

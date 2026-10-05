@@ -80,6 +80,10 @@ end_caps = "triangles"
 label_font_height = 0.013
 ```
 
+Font heights in a style (`font_height`, `label_font_height`) are fractions of the page height
+on the final figure, also in multi-panel layouts. Raw resources in `.res` keep their PyNGL
+meaning, so `Ngl.panel` scales them with the plot.
+
 `xn.style.show("mine")` prints the merged style.
 
 ## Colormaps

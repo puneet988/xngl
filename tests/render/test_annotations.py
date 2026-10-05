@@ -101,3 +101,78 @@ def test_render_package_imports_annotations_module_in_fresh_process():
     out = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True,
                          check=False)
     assert out.returncode == 0, out.stderr[-500:]
+
+
+# Deferred minor 7: Ngl.panel shrinks every plot, and with it the text attached to the plot.
+# xngl font heights are fractions of the page (like tags, shared colour bars and the title).
+@pytest.mark.parametrize("layout", [(1, 1), (2, 2), (1, 4)])
+def test_text_heights_are_page_units(make_da, outdir, layout):
+    f = xn.Figure(*layout, output=outdir / f"th{layout[0]}x{layout[1]}.png", style="paper")
+    for ax in f.panels:
+        ax.contour_map(make_da(), left="PD-PI", right="R")
+        ax.set_ticks(lon=10, lat=10)
+    f.save()
+    want_s = f.style.options("strings")["font_height"]
+    want_t = f.style.options("ticks")["label_font_height"]
+    for ax in f.panels:
+        h = ax.text_heights
+        assert h["left"] == pytest.approx(want_s, rel=0.03)
+        assert h["right"] == pytest.approx(want_s, rel=0.03)
+        assert h["lon"] == pytest.approx(want_t, rel=0.03)
+        assert h["lat"] == pytest.approx(want_t, rel=0.03)
+
+
+def test_wide_layout_text_not_smaller_than_tags(make_da, outdir):
+    # README quick start shape: style="paper", ncols=4
+    f = xn.Figure(ncols=4, output=outdir / "wide.png", width=3000, style="paper", tags="a)")
+    for ax in f.panels:
+        ax.contour_map(make_da(), left="PD-PI")
+        ax.set_ticks(lon=10, lat=10)
+    f.save()
+    tag = f.panel_resolved["nglPanelFigureStringsFontHeightF"]
+    assert all(ax.text_heights["left"] >= 0.75 * tag for ax in f.panels)
+
+
+def test_text_too_large_for_layout_warns(make_da, outdir):
+    f = xn.Figure(ncols=4, output=outdir / "toolong.png", style={"strings": {"font_height": 0.03}})
+    for ax in f.panels:
+        ax.contour_map(make_da(), left="A_VERY_LONG_EXPERIMENT_NAME")
+    with pytest.warns(XnglWarning, match="do not fit"):
+        f.save()
+    h = f[0, 0].text_heights["left"]
+    # smaller text, but not smaller than without the fit (x0.26 in 1x4), and a sensible plot
+    assert 0.25 * 0.03 < h < 0.03 and f[0, 0].frame[2] > 0.1
+
+
+def test_raw_tick_font_resource_keeps_pyngl_meaning(make_da, outdir):
+    # a raw resource is passed as is: Ngl.panel scales it with the plot
+    f = xn.Figure(ncols=4, output=outdir / "rawtick.png",
+                  style={"ticks": {"res": {"tmXBLabelFontHeightF": 0.03,
+                                             "tmYLLabelFontHeightF": 0.03}}})
+    for ax in f.panels:
+        ax.contour_map(make_da())
+        ax.set_ticks(lon=10, lat=10)
+    f.save()
+    # (PyNGL's blank plot keeps XB and YL label heights equal: tmEqualizeXYSizes)
+    assert f[0, 0].text_heights["lon"] < 0.015 and f[0, 0].text_heights["lat"] < 0.015
+
+
+def test_fit_passes_add_no_tags(make_da, outdir, monkeypatch):
+    # Ngl.panel attaches figure strings to the plots, so each extra layout pass would add
+    # another tag (a double border on the tag box)
+    import Ngl
+
+    from xngl.render import layout
+    calls, real_panel = [], Ngl.panel
+
+    def spy(wks, plots, dims, res):
+        calls.append((getattr(res, "nglDraw", True), hasattr(res, "nglPanelFigureStrings")))
+        return real_panel(wks, plots, dims, res)
+
+    monkeypatch.setattr(layout.Ngl, "panel", spy)
+    f = xn.Figure(ncols=2, output=outdir / "tagsonce.png", tags="a)")
+    for ax in f.panels:
+        ax.contour_map(make_da(), left="L")
+    f.save()
+    assert len(calls) > 1 and calls[-1] == (True, True)
+    assert all(not tags for _draw, tags in calls[:-1])

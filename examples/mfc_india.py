@@ -34,14 +34,14 @@ cnMaxLevelCount = 255
 cnInfoLabelOn = false
 [ticks]
 outward = true
-label_font_height = 0.03
+label_font_height = 0.011
 outer_only = true
 [ticks.res]
 tmBorderThicknessF = 2.0
 tmXBMinorOn = false
 tmYLMinorOn = false
 [strings]
-font_height = 0.03
+font_height = 0.014
 [colorbar]
 end_caps = "triangles"
 box_lines = false

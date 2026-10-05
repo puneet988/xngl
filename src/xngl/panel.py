@@ -47,6 +47,9 @@ class Panel:
         self.ngl_plot = None
         self.attached: list = []  # PyNGL ids of overlays (kept alive with the plot)
         self.string_ids: dict = {}
+        self.tick_id = None   # PyNGL id of the tick-label overlay (render only)
+        # final text heights on the page (NDC) after save(): left/center/right, lon, lat
+        self.text_heights: dict = {}
         self.strings_resolved: dict = {}
         self.ticks_resolved: dict | None = None
         # final NDC geometry, recorded by the renderer before the workstation closes

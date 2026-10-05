@@ -60,6 +60,7 @@ def _forget_pyngl_ids(fig) -> None:
         ax.ngl_plot = None
         ax.attached = []
         ax.string_ids = {}
+        ax.tick_id = None
 
 
 def render_figure(fig) -> Path:
@@ -76,7 +77,9 @@ def render_figure(fig) -> Path:
             plot = _render_panel(wks, fig, ax, modes[ax.index], where)
             ax.ngl_plot = plot
             plot_list.append(plot)
-        where.panel, where.layer = None, "panel layout"
+        where.panel, where.layer = None, "text size"
+        layout.fit_text(wks, fig, plot_list)
+        where.layer = "panel layout"
         layout.do_panel(wks, fig, plot_list)
         layout.record_geometry(fig)
         where.layer = "colour bars"

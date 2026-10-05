@@ -91,6 +91,7 @@ def uses_xngl_ticks(panel, style: Style) -> bool:
 def add_ticks(wks, plot, panel, fig, style: Style) -> None:
     """Blank-plot overlay with explicit lat/lon labels (CylindricalEquidistant only)."""
     panel.ticks_resolved = None
+    panel.tick_id = None
     request = tick_request(panel, style)
     if request is None:
         return
@@ -128,4 +129,5 @@ def add_ticks(wks, plot, panel, fig, style: Style) -> None:
         raise RenderError("tick labels: Ngl.blank_plot returned no plot")
     Ngl.overlay(plot.base, blank)
     panel.attached.append(blank)
+    panel.tick_id = blank
     panel.ticks_resolved = dict(res)

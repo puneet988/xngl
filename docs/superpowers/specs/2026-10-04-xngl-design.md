@@ -294,6 +294,8 @@ A style is a TOML file with one table per plot part. Each table can contain:
 
 Tables: `font`, `map`, `contour`, `vectors`, `ticks`, `strings`, `tags`, `colorbar`, `shapefile`, `box`, `stipple`, `panel`, `workstation`.
 
+Font-height options (`strings.font_height`, `ticks.label_font_height`, `tags.font_height`, the shared colour bar font heights) are fractions of the page height on the final figure. `Ngl.panel` shrinks each plot and the text attached to it, so xngl sets panel strings and tick labels again after the layout. If the text does not fit, xngl draws it smaller and gives an `XnglWarning`. Raw resources in a `.res` sub-table keep their PyNGL meaning. (Changed after the final review of v1, deferred minor 7.)
+
 ```toml
 extends = "paper"
 
@@ -308,7 +310,7 @@ cnMaxLevelCount     = 255
 
 [ticks]
 outward = true
-label_font_height = 0.03
+label_font_height = 0.012
 [ticks.res]
 tmBorderThicknessF = 2.0
 
