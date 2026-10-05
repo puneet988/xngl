@@ -96,7 +96,8 @@ def test_title(make_da, outdir):
         ax.contour_map(make_da())
     f.save()
     assert f.panel_resolved["nglPanelTop"] == pytest.approx(0.93)
-    assert white_fraction(png, 0.3, 0.7, 0.0, 0.06) < 1.0
+    page_y = 1 - f.title_resolved["y"]
+    assert white_fraction(png, 0.3, 0.7, page_y - 0.02, page_y + 0.02) < 1.0
 
 
 def test_group_bar_space_reserved_and_on_page(make_da, outdir):
@@ -149,3 +150,82 @@ def test_one_bar_for_all_rows_adds_no_row_gap(make_da, outdir):
     f.save()
     assert f.panel_resolved["nglPanelBottom"] > 0
     assert "nglPanelYWhiteSpacePercent" not in f.panel_resolved
+
+
+def test_shared_bar_default_label(make_da, outdir):  # final review I2
+    f = xn.Figure(ncols=2, output=outdir / "deflabel.png")
+    for ax in f.panels:
+        ax.contour_map(make_da(long_name="Temperature", units="K"), levels=LEV)
+    cb = f.colorbar()
+    f.save()
+    assert cb.resolved["lbTitleOn"] is True and cb.resolved["lbTitleString"] == "Temperature (K)"
+    assert cb.label is None   # the request itself is not changed
+
+
+def test_own_bar_size_and_offset(make_da, outdir):  # final review I3
+    f = xn.Figure(ncols=2, output=outdir / "ownsize.png")
+    # same data, so both plots have the same size: the full-size bar is the reference
+    a = f[0, 0].contour_map(make_da(), levels=LEV, colorbar={"width": 1.0, "height": 1.0})
+    b = f[0, 1].contour_map(make_da(), levels=LEV,
+                            colorbar={"width": 0.5, "height": 0.1, "offset": 0.05})
+    f.save()
+    ra, rb = a.resolved_res(), b.resolved_res()
+    assert 0.3 < ra["pmLabelBarWidthF"] < 1
+    assert rb["pmLabelBarWidthF"] == pytest.approx(0.5 * ra["pmLabelBarWidthF"])
+    assert rb["pmLabelBarHeightF"] == pytest.approx(0.1 * ra["pmLabelBarHeightF"])
+    assert rb["pmLabelBarOrthogonalPosF"] == pytest.approx(0.05)
+    assert "pmLabelBarOrthogonalPosF" not in ra
+
+
+def test_own_bar_without_size_options_keeps_pyngl_defaults(make_da, outdir):
+    f = xn.Figure(output=outdir / "ownsize0.png")
+    c = f[0, 0].contour_map(make_da(), levels=LEV, colorbar=True)
+    f.save()
+    assert not any(k.startswith("pmLabelBar") for k in c.resolved_res())
+
+
+def test_own_bar_res_beats_size_option(make_da, outdir):  # final review I3
+    f = xn.Figure(output=outdir / "ownsize2.png")
+    c = f[0, 0].contour_map(make_da(), levels=LEV,
+                            colorbar={"width": 0.5, "res": {"pmLabelBarWidthF": 0.2}})
+    f.save()
+    assert c.resolved_res()["pmLabelBarWidthF"] == 0.2
+
+
+def test_shared_bar_size_is_fraction_and_centred(make_da, outdir):  # final review I4
+    f = xn.Figure(ncols=2, output=outdir / "frac.png")
+    for ax in f.panels:
+        ax.contour_map(make_da(), levels=LEV)
+    cb = f.colorbar(width=0.5)
+    f.save()
+    x0 = min(ax.frame[0] for ax in f.panels)
+    x1 = max(ax.frame[0] + ax.frame[2] for ax in f.panels)
+    x, _y, w, _h = cb.drawn_box
+    assert w == pytest.approx(0.5 * (x1 - x0))
+    assert x + w / 2 == pytest.approx((x0 + x1) / 2)
+
+
+def test_shared_vertical_bar_height_is_fraction_and_centred(make_da, outdir):  # final review I4
+    f = xn.Figure(2, 1, output=outdir / "vfrac.png")
+    for ax in f.panels:
+        ax.contour_map(make_da(), levels=LEV)
+    cb = f.colorbar(orientation="vertical", height=0.5)
+    f.save()
+    ytop = max(ax.frame[1] for ax in f.panels)
+    ybot = min(ax.frame[1] - ax.frame[3] for ax in f.panels)
+    _x, y, _w, h = cb.drawn_box
+    assert h == pytest.approx(0.5 * (ytop - ybot))
+    assert y - h / 2 == pytest.approx((ytop + ybot) / 2)
+
+
+def test_title_sits_just_above_panels(make_da, outdir):  # final review I5
+    png = outdir / "title1x4.png"
+    f = xn.Figure(ncols=4, output=png, width=2000, title="Main title")
+    for ax in f.panels:
+        ax.contour_map(make_da())
+    f.save()
+    top = max(ax.bbox[0] for ax in f.panels)
+    y = f.title_resolved["y"]
+    assert top < y < top + 0.08
+    page_y = 1 - y   # PNG rows count from the top; a 1x4 page is square
+    assert white_fraction(png, 0.3, 0.7, page_y - 0.02, page_y + 0.02) < 1.0

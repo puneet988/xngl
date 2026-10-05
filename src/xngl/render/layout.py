@@ -57,16 +57,29 @@ def _group_bar_space(fig) -> dict:
     return r
 
 
+TITLE_GAP = 0.01   # NDC space between the top of the panels and the title
+
+
 def draw_title(wks, fig) -> None:
-    """Figure title centred above the panels (txString in Ngl.panel draws nothing)."""
+    """Figure title centred just above the panels (txString in Ngl.panel draws nothing).
+
+    Uses the geometry from record_geometry, so a 1-row layout gets its title next to the
+    panels and not at the top of the page.
+    """
+    fig.title_resolved = None
     if not fig.title:
         return
     opts = fig.style.options("strings")
-    res = {"txFontHeightF": 1.5 * float(opts.get("font_height", 0.02)), "txJust": "CenterCenter"}
+    height = 1.5 * float(opts.get("font_height", 0.02))
+    res = {"txFontHeightF": height, "txJust": "CenterCenter"}
     font = fig.style.options("font").get("name")
     if font:
         res["txFont"] = font
-    Ngl.text_ndc(wks, fig.title, 0.5, (1.0 + TITLE_TOP) / 2, to_resources(res))
+    tops = [ax.bbox[0] for ax in fig.panels if ax.bbox is not None]
+    y = max(tops) + TITLE_GAP + height / 2 if tops else (1.0 + TITLE_TOP) / 2
+    y = min(y, 1.0 - height / 2)
+    Ngl.text_ndc(wks, fig.title, 0.5, y, to_resources(res))
+    fig.title_resolved = {**res, "y": float(y)}
 
 
 def do_panel(wks, fig, plots: list) -> None:

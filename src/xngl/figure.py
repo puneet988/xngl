@@ -56,6 +56,7 @@ class Figure:
         self.wks = None
         self.panel_resolved: dict | None = None
         self.workstation_resolved: dict | None = None
+        self.title_resolved: dict | None = None   # title resources and NDC "y" after save()
 
     def __getitem__(self, idx) -> Panel:
         r, c = idx

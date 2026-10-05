@@ -85,7 +85,30 @@ def build_contour(wks, spec: ContourSpec, style: Style, colorbar_mode: str,
     plot = Ngl.contour_map(wks, filled(field.values), to_resources(res))
     if plot is None:
         raise RenderError("Ngl.contour_map returned no plot")
+    if colorbar_mode == "own":
+        _size_own_colorbar(plot, spec, style)
     return plot
+
+
+def _size_own_colorbar(plot, spec: ContourSpec, style: Style) -> None:
+    """Apply width/height (fractions of the plot) and offset (NDC) to an own colour bar.
+
+    The plot size is known only after Ngl.contour_map. Raw resources (res=, colorbar res,
+    style res) win over these options, as in the merge order.
+    """
+    cb = own_colorbar_spec(spec, style)
+    vp_w, vp_h = Ngl.get_float(plot, "vpWidthF"), Ngl.get_float(plot, "vpHeightF")
+    wanted = {}
+    if cb.width:
+        wanted["pmLabelBarWidthF"] = float(cb.width) * vp_w
+    if cb.height:
+        wanted["pmLabelBarHeightF"] = float(cb.height) * vp_h
+    if cb.offset is not None:
+        wanted["pmLabelBarOrthogonalPosF"] = float(cb.offset)
+    wanted = {k: v for k, v in wanted.items() if k not in spec.resolved}
+    if wanted:
+        Ngl.set_values(plot.contour, to_resources(wanted))
+        spec.resolved.update(wanted)
 
 
 def vector_keyword_res(spec: VectorSpec, style: Style) -> dict:

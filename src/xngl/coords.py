@@ -92,8 +92,15 @@ def prepare_field(da: xr.DataArray, *, what: str = "data") -> Field:
         values = np.asarray(da.values, dtype=np.float64)
     else:
         da = da.transpose(lat_c.dims[0], lon_c.dims[0])
-        if da[lat_name].size > 1 and da[lat_name].values[0] > da[lat_name].values[-1]:
-            da = da.isel({lat_c.dims[0]: slice(None, None, -1)})
+        # PyNGL draws non-monotonic coordinates at index positions, so sort them
+        # (e.g. longitude after a 0..360 -> -180..180 change without sortby)
+        la = da[lat_name].values
+        if la.size > 1 and not np.all(np.diff(la) > 0):
+            da = da.isel({lat_c.dims[0]: np.argsort(la, kind="stable")})
+        lo = da[lon_name].values
+        step = np.diff(lo)
+        if lo.size > 1 and not (np.all(step > 0) or np.all(step < 0)):
+            da = da.isel({lon_c.dims[0]: np.argsort(lo, kind="stable")})
         lat = np.asarray(da[lat_name].values, dtype=np.float64)
         lon = np.asarray(da[lon_name].values, dtype=np.float64)
         values = np.asarray(da.values, dtype=np.float64)

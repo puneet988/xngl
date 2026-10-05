@@ -50,6 +50,18 @@ def _render_panel(wks, fig, ax, mode, where: _Where):
     return plot
 
 
+def _forget_pyngl_ids(fig) -> None:
+    """PyNGL ids are invalid after Ngl.destroy; using them can crash Python.
+
+    Inspect the plot in an add_custom hook, or use resolved_res(), panel.frame and panel.bbox.
+    """
+    fig.wks = None
+    for ax in fig.panels:
+        ax.ngl_plot = None
+        ax.attached = []
+        ax.string_ids = {}
+
+
 def render_figure(fig) -> Path:
     """Draw ``fig`` and write its output file. Returns the output path."""
     modes = colorbar_modes(fig)
@@ -76,6 +88,7 @@ def render_figure(fig) -> Path:
         error = exc
     finally:
         Ngl.destroy(wks)
+        _forget_pyngl_ids(fig)
     if error is not None:
         for p in {target, fig.output}:
             p.unlink(missing_ok=True)

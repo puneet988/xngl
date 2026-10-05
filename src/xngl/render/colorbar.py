@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+import dataclasses
 import warnings
 
 import Ngl
 import numpy as np
 
 from ..colors.colormaps import get
+from ..coords import default_label
 from ..errors import RenderError, XnglWarning
 from .util import to_resources
 
@@ -42,6 +44,13 @@ def _palette(first) -> np.ndarray:
     return np.asarray(Ngl.get_integer_array(first.ngl_plot.contour, "cnFillColors"))
 
 
+def _with_default_label(spec, group):
+    """The spec with ``long_name (units)`` as label when it has none (spec 5.3 rule 7)."""
+    if spec.label is not None:
+        return spec
+    return dataclasses.replace(spec, label=default_label(group[0].base.field))
+
+
 def draw_colorbars(wks, fig) -> None:
     """Draw every shared colour bar with Ngl.labelbar_ndc, below (or right of) its panels."""
     for group, spec in fig.colorbars:
@@ -54,20 +63,22 @@ def draw_colorbars(wks, fig) -> None:
         ytop = max(f[1] for f in frames)
         ybot = min(f[1] - f[3] for f in frames)
         offset = spec.offset if spec.offset is not None else DEFAULT_OFFSET
+        # width/height are fractions of the panel group (spec 6.3); the bar is centred on it
+        gw, gh = x1 - x0, ytop - ybot
         if spec.orientation == "vertical":
-            w = spec.width or DEFAULT_THICKNESS
-            h = spec.height or (ytop - ybot)
-            x, y = float(boxes[:, 3].max()) + offset, ytop
+            w = spec.width * gw if spec.width else DEFAULT_THICKNESS
+            h = (spec.height or 1.0) * gh
+            x, y = float(boxes[:, 3].max()) + offset, ytop - (gh - h) / 2
         else:
-            w = spec.width or (x1 - x0)
-            h = spec.height or DEFAULT_THICKNESS
-            x, y = x0, float(boxes[:, 1].min()) - offset
+            w = (spec.width or 1.0) * gw
+            h = spec.height * gh if spec.height else DEFAULT_THICKNESS
+            x, y = x0 + (gw - w) / 2, float(boxes[:, 1].min()) - offset
         levels = group[0].base.levels
         colors = _palette(group[0])
         labels = [spec.label_format.format(v) if spec.label_format else f"{v:g}" for v in levels]
         res = {"vpWidthF": float(w), "vpHeightF": float(h), "lbFillColors": colors,
                "lbMonoFillPattern": True, "lbLabelAlignment": "InteriorEdges",
-               "lbPerimOn": False, **spec.to_res(levels)}
+               "lbPerimOn": False, **_with_default_label(spec, group).to_res(levels)}
         font = fig.style.options("font").get("name")
         if font:
             res.setdefault("lbLabelFont", font)

@@ -94,3 +94,19 @@ def test_default_label(make_da):
     assert default_label(prepare_field(make_da(long_name="Temperature", units="K"))) == "Temperature (K)"
     assert default_label(prepare_field(make_da(long_name="Temperature"))) == "Temperature"
     assert default_label(prepare_field(make_da())) is None
+
+
+def test_unsorted_lon_is_sorted():  # final review C1
+    da = global_da()
+    da = da.assign_coords(lon=((da.lon + 180) % 360) - 180)   # -180..177.5, not sorted
+    with pytest.warns(XnglWarning, match="cyclic"):
+        f = prepare_field(da)
+    assert np.all(np.diff(f.lon) > 0) and f.cyclic_added
+    np.testing.assert_allclose(f.values[:, :-1], da.sortby("lon").values)
+
+
+def test_unsorted_lat_is_sorted(make_da):  # final review C1
+    idx = np.random.default_rng(0).permutation(41)
+    f = prepare_field(make_da().isel(lat=idx))
+    assert np.all(np.diff(f.lat) > 0)
+    np.testing.assert_array_equal(f.values, make_da().values)

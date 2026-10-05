@@ -17,7 +17,7 @@ def test_single_panel_png(make_da, outdir):
     assert r["cnLevelSelectionMode"] == "ExplicitLevels" and r["cnFillPalette"].shape == (22, 4)
     assert r["mpMinLatF"] == 0 and r["mpMaxLonF"] == 100 and r["nglDraw"] is False
     assert r["cnFillOn"] is True and r["cnFillMode"] == "AreaFill" and r["lbLabelBarOn"] is False
-    assert f.panels[0].ngl_plot is not None
+    assert f.panels[0].frame is not None
 
 
 @pytest.mark.parametrize("ext", ["pdf", "png", "eps", "ps", "svg"])
@@ -106,3 +106,13 @@ def test_render_error_cleans_up(make_da, outdir, monkeypatch):
     with pytest.raises(RenderError, match=r"panel \(0, 0\).*contour_map"):
         f.save()
     assert not (outdir / "bad.png").exists()
+
+
+def test_pyngl_ids_cleared_after_save(make_da, outdir):  # final review I1
+    # the workstation is destroyed in save(); dangling ids crash PyNGL when used
+    f = xn.Figure(output=outdir / "ids.png")
+    f.panels[0].contour_map(make_da())
+    f.save()
+    ax = f.panels[0]
+    assert f.wks is None and ax.ngl_plot is None and ax.attached == [] and ax.string_ids == {}
+    assert ax.frame is not None and ax.bbox is not None

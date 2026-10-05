@@ -130,7 +130,7 @@ render/: open_wks → plots → overlays → tick labels → strings → custom 
 1. Public objects (`Figure`, `Panel`, specs, `Colormap`, styles) hold plain Python and numpy data. They do not hold PyNGL objects before `save()`.
 2. Each figure calls `Ngl.destroy(wks)`. xngl never calls `Ngl.end()`, so one script or notebook can make many figures.
 3. Errors appear at the call that caused them (section 8).
-4. After `save()`, `ax.ngl_plot` and `fig.wks` give the raw PyNGL ids for inspection. Changes at this point do not reach the output. Use the custom hook for changes.
+4. During `save()`, the custom hook gets the raw PyNGL ids (`wks`, `plot`, and `panel.ngl_plot`) for inspection and changes. `Ngl.destroy(wks)` makes these ids invalid, and using them can crash Python. So after `save()`, `ax.ngl_plot` and `fig.wks` are `None`. Use `resolved_res()`, `panel.frame`, `panel.bbox` and `ColorbarSpec.drawn_box` to inspect the result. (Changed after the final review of v1.)
 
 ## 5. Public API
 
